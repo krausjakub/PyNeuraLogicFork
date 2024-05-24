@@ -94,7 +94,6 @@ class BaseRelation:
         
     def __le__(self, other: Union[Iterable["BaseRelation"], "BaseRelation", "FunctionalTree"]) -> rule.Rule:
         if isinstance(other, BaseRelation) or isinstance(other, Iterable):
-            print(f"other: {other}")
             return rule.Rule(self, other)
         elif isinstance(other, FunctionalTree):
             metadata = other.create_metadata()
@@ -102,7 +101,6 @@ class BaseRelation:
             if len(leaves) > 0:
                 if isinstance(leaves[0], list):
                     leaves = leaves[0]
-            print(f"leaves: {leaves}")
             new_rule = rule.Rule(self, leaves) | metadata
             return new_rule
         else:

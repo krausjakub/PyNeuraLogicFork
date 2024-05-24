@@ -234,10 +234,26 @@ class FunctionContainer:
 
 
     def _get_ft(self, val, op):
-        n = FunctionalTree()
-        n.operation = op
-        n.left_value = val
-        return n
+        if isinstance(val, list):
+            if len(val) == 1:
+                val = val [0]
+            else:
+                first = None
+                for el in val:
+                    if first == None:
+                        first = el
+                    else:
+                        m = FunctionalTree()
+                        m.operation = op
+                        m.left_value = first
+                        m.right_value = el
+                        first = m
+                return first
+        else:        
+            n = FunctionalTree()
+            n.operation = op
+            n.left_value = val
+            return n
     
     def _tree_has_comb(self, value):
         if isinstance(value, FunctionalTree):
