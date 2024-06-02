@@ -110,6 +110,17 @@ class FunctionalTree():
             if self.right_value.has_combination():
                 return True
         return False
+    
+    def has_transformation(self):
+        if isinstance(self.operation, Transformation):
+            return True
+        if isinstance(self.left_value, FunctionalTree):
+            if self.left_value.has_transformation():
+                return True
+        if isinstance(self.right_value, FunctionalTree):
+            if self.right_value.has_transformation():
+                return True
+        return False
 
     def __str__(self) -> str:
         if self.left_value is not None:
@@ -236,7 +247,7 @@ class FunctionContainer:
     def _get_ft(self, val, op):
         if isinstance(val, list):
             if len(val) == 1:
-                val = val [0]
+                val = val[0]
             else:
                 first = None
                 for el in val:
@@ -258,6 +269,12 @@ class FunctionContainer:
     def _tree_has_comb(self, value):
         if isinstance(value, FunctionalTree):
             return value.has_combination()
+        else:
+            return False
+        
+    def _tree_has_trans(self, value):
+        if isinstance(value, FunctionalTree):
+            return value.has_transformation()
         else:
             return False
 
@@ -293,7 +310,7 @@ class FunctionContainer:
         return self._get_ft(value, Transformation.TRANSP)
     def _softmax_private(self, value, agg=False):
         # comb, trans, agg
-        if agg:
+        if agg or self._tree_has_trans(value):
             op = Aggregation.SOFTMAX
         elif self._tree_has_comb(value):
             op = Transformation.SOFTMAX
@@ -319,19 +336,19 @@ class FunctionContainer:
     # aggregation
     def _avg_private(self, value, agg=False):
         # comb, agg
-        return self._get_ft(value, Aggregation.AVG if agg else Combination.AVG)
+        return self._get_ft(value, Combination.AVG if not self._tree_has_comb(value) else Aggregation.AVG)
     def _max_private(self, value, agg=False):
         # comb, agg
-        return self._get_ft(value, Aggregation.MAX if agg else Combination.MAX)
+        return self._get_ft(value, Combination.MAX if not self._tree_has_comb(value) else Aggregation.MAX)
     def _min_private(self, value, agg=False):
         # comb, agg
-        return self._get_ft(value, Aggregation.MIN if agg else Combination.MIN)
+        return self._get_ft(value, Combination.MIN if not self._tree_has_comb(value) else Aggregation.MIN)
     def _sum_private(self, value, agg=False):
         # comb, agg
-        return self._get_ft(value, Aggregation.SUM if agg else Combination.SUM)
+        return self._get_ft(value, Combination.SUM if not self._tree_has_comb(value) else Aggregation.SUM)
     def _count_private(self, value, agg=False):
         # comb, agg
-        return self._get_ft(value, Aggregation.COUNT if agg else Combination.COUNT)
+        return self._get_ft(value, Combination.COUNT if not self._tree_has_comb(value) else Aggregation.COUNT)
 
     # combination
     def _product_private(self, value, agg=False):
@@ -344,6 +361,6 @@ class FunctionContainer:
         return self._get_ft(value, Combination.CROSSSUM)
     def _concat_private(self, value, agg=False):
         # comb, agg
-        return self._get_ft(value, Aggregation.CONCAT if agg else Combination.CONCAT)
+        return self._get_ft(value,Combination.CONCAT if not self._tree_has_comb(value) else Aggregation.CONCAT)
     def _cossim_private(self, value, agg=False):
         return self._get_ft(value, Combination.COSSIM)
